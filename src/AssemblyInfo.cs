@@ -1,4 +1,4 @@
-﻿#region Using directives
+#region Using directives
 
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Draw")]
-[assembly: AssemblyCopyright("(c) 2008 Vassil Vassilev, Alexander Penev")]
+[assembly: AssemblyCopyright("(c) 20019 Aleksey Nikolaev")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
