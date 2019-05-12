@@ -32,15 +32,23 @@ namespace Draw
             this.BorderWidth = shape.BorderWidth;
             this.Transparency = shape.Transparency;
             this.Rotation = shape.Rotation;
+            this.IsSelected = shape.IsSelected;
 		}
-		#endregion
-		
-		#region Properties
-		
-		/// <summary>
-		/// Обхващащ правоъгълник на елемента.
-		/// </summary>
-		private RectangleF rectangle;		
+        #endregion
+
+        #region Properties
+
+        private bool isSelected;
+        public virtual bool IsSelected
+        {
+            get { return isSelected; }
+            set { isSelected = value; }
+        }
+
+        /// <summary>
+        /// Обхващащ правоъгълник на елемента.
+        /// </summary>
+        private RectangleF rectangle;		
 		public virtual RectangleF Rectangle {
 			get { return rectangle; }
 			set { rectangle = value; }
@@ -130,6 +138,10 @@ namespace Draw
             if (BorderWidth != 0)
             {
                 grfx.DrawRectangle(new Pen(Color.FromArgb(Transparency, BorderColor), BorderWidth), Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+            }
+            if (IsSelected == true)
+            {
+                grfx.DrawRectangle(new Pen(Color.Red), Rectangle.X - 3, Rectangle.Y - 3, Rectangle.Width + 6, Rectangle.Height + 6);
             }
             grfx.FillRectangle(new SolidBrush(Color.FromArgb(Transparency, FillColor)), Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
            

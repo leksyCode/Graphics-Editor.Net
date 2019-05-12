@@ -44,6 +44,10 @@ namespace Draw.src.Model
             {
                 grfx.DrawEllipse(new Pen(Color.FromArgb(Transparency, BorderColor), BorderWidth), Rectangle);
             }
+            if (IsSelected == true)
+            {
+                grfx.DrawEllipse(new Pen(Color.Red), Rectangle.X - 3, Rectangle.Y - 3, Rectangle.Width + 6, Rectangle.Height + 6);
+            }
             grfx.FillEllipse(new SolidBrush(Color.FromArgb(Transparency, FillColor)), Rectangle);
         }
     }

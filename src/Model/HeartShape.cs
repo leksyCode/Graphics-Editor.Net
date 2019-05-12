@@ -50,12 +50,11 @@ namespace Draw.src.Model
                 grfx.DrawPath(new Pen(Color.FromArgb(Transparency, BorderColor), BorderWidth), path);
                 grfx.DrawPolygon(new Pen(Color.FromArgb(Transparency, BorderColor), BorderWidth), points);
             }
+            if (IsSelected == true)
+            {
+                grfx.DrawRectangle(new Pen(Color.Red), Rectangle.X - 3, Rectangle.Y - 3, Rectangle.Width + 6, Rectangle.Height + 6);
+            }
             grfx.FillPolygon(new SolidBrush(Color.FromArgb(Transparency, FillColor)), points);
-            grfx.FillPath(new SolidBrush(Color.FromArgb(Transparency, FillColor)), path);
-           
-
-
-        }
-
+            grfx.FillPath(new SolidBrush(Color.FromArgb(Transparency, FillColor)), path);        }
     }
 }

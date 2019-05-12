@@ -17,7 +17,6 @@ namespace Draw
 		{
 		}
         public List<Shape> ShapeList { get; set; } = new List<Shape>();
-
         #endregion
 
         #region Drawing
@@ -51,9 +50,9 @@ namespace Draw
 		/// <param name="item">Елемент за визуализиране.</param>
 		public virtual void DrawShape(Graphics grfx, Shape item)
         {
-            grfx.RotateTransform(item.Rotation);
+            //grfx.RotateTransform(item.Rotation);
             item.DrawSelf(grfx);
-            grfx.ResetTransform();
+            //grfx.ResetTransform();
 
         }
 		

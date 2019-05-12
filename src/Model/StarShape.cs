@@ -50,7 +50,14 @@ namespace Draw.src.Model
                     new PointF(Rectangle.X, Rectangle.Y + Rectangle.Height/2.5f),
                     new PointF((Rectangle.X + Rectangle.Width / 2) - Rectangle.Width/10, Rectangle.Y + Rectangle.Height/2 - Rectangle.Height/8),
                     };
+            if (BorderWidth != 0)
+            {
                 grfx.DrawPolygon(new Pen(Color.FromArgb(Transparency, BorderColor), BorderWidth), points);
+            }
+            if (IsSelected == true)
+            {
+                grfx.DrawPolygon(new Pen(Color.Red), points);
+            }
             grfx.FillPolygon(new SolidBrush(Color.FromArgb(Transparency, FillColor)), points);
 
         }

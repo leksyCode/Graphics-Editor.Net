@@ -45,7 +45,9 @@ namespace Draw.src.Model
         /// </summary>
         public override void DrawSelf(Graphics grfx)
         {
+
             grfx.DrawLine(new Pen(Color.FromArgb(Transparency, FillColor), BorderWidth+1), P1, P2);
+            
         }
     }  
 }

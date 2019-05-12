@@ -23,6 +23,8 @@ namespace Draw
         private Rectangle _r;
         int penWidth;
 
+        public static List<Button> layoutButtons = new List<Button>();
+
         /// <summary>
         /// Агрегирания диалогов процесор във формата улеснява манипулацията на модела.
         /// </summary>
@@ -31,6 +33,7 @@ namespace Draw
         public MainForm()
         {
             InitializeComponent();
+            layoutButtons.Add(button1);
         }
 
         private void viewPort_Load(object sender, EventArgs e)
@@ -101,10 +104,6 @@ namespace Draw
                 {
                     e.Graphics.DrawLine(new Pen(Color.FromArgb(95, BorderColor), penWidth + 1), _p, _p2);
                 }
-                else if (ShapeToDraw is ImageShape)
-                {
-                    e.Graphics.DrawImage(Image.FromFile(FilePath), _r);
-                }
             }
             dialogProcessor.ReDraw(sender, e);
         }
@@ -147,7 +146,7 @@ namespace Draw
                     viewPort.Width = (int)(viewPortStaticWidth * zoom);
                     viewPort.Height = (int)(viewPortStaticHeight * zoom);
                 }
-                label6.Text = "Zoom: " + zoom.ToString() + "x";
+                label6.Text = "Zoom:\n" + (zoom * 100).ToString() + "%";
                 viewPort.Invalidate();
             }
         }
@@ -164,25 +163,50 @@ namespace Draw
             if (pickUpSpeedButton.Checked)
             {
                 dialogProcessor.Selection = dialogProcessor.ContainsPoint(e.Location);
+                if (ModifierKeys.HasFlag(Keys.Control))
+                {
+                    if (!dialogProcessor.Selections.Contains(dialogProcessor.Selection) && dialogProcessor.Selection != null)
+                    {
+                        dialogProcessor.Selections.Add(dialogProcessor.Selection);
+                        dialogProcessor.Selections[dialogProcessor.Selections.Count - 1].IsSelected = true;
+                    }
+                    else
+                    {
+                        dialogProcessor.Selections.Remove(dialogProcessor.Selection);
+                        dialogProcessor.ShapeList.Find(s => s.Equals(dialogProcessor.Selection)).IsSelected = false;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < dialogProcessor.Selections.Count - 1; i++)
+                    {
+                        dialogProcessor.Selections[i].IsSelected = false;
+                        dialogProcessor.Selections.Remove(dialogProcessor.Selections[i]);
+                    }
+                    
+                }
+
                 if (dialogProcessor.Selection != null)
                 {
                     statusBar.Items[0].Text = "Последно действие: Селекция на примитив";
                     dialogProcessor.IsDragging = true;
                     dialogProcessor.LastLocation = e.Location;
-                    numericUpDown1.Value = dialogProcessor.Selection.BorderWidth;
-                    numericUpDown2.Value = (decimal)dialogProcessor.Selection.Width;
-                    numericUpDown3.Value = (decimal)dialogProcessor.Selection.Height;
-                    numericUpDown4.Value = dialogProcessor.Selection.Transparency;
-                    numericUpDown5.Value = (decimal)dialogProcessor.Selection.Rotation;
+                    //numericUpDown1.Value = dialogProcessor.Selection.BorderWidth;
+                    //numericUpDown2.Value = (decimal)dialogProcessor.Selection.Width;
+                    //numericUpDown3.Value = (decimal)dialogProcessor.Selection.Height;
+                    //numericUpDown4.Value = dialogProcessor.Selection.Transparency;
+                    //numericUpDown5.Value = (decimal)dialogProcessor.Selection.Rotation;
 
-                    label1.Text = dialogProcessor.Selection.BorderColor.ToString()
+                    label8.Text = dialogProcessor.Selection.BorderColor.ToString()
                     + "\n" + dialogProcessor.Selection.FillColor.ToString()
                     + "\n width: " + dialogProcessor.Selection.Width + "\n height: " + dialogProcessor.Selection.Height
-                    + "\n border: " + dialogProcessor.Selection.BorderWidth.ToString() + "px" 
-                    + "\n transparency: " + dialogProcessor.Selection.Transparency + "\n" 
-                    +"\n location: " + dialogProcessor.Selection.Location.ToString() + "\n"                   
-                    +" shape: " + dialogProcessor.Selection.GetType();
+                    + "\n border: " + dialogProcessor.Selection.BorderWidth.ToString() + "px"
+                    + "\n transparency: " + dialogProcessor.Selection.Transparency + "\n"
+                    + "\n location: " + dialogProcessor.Selection.Location.ToString() + "\n"
+                    + " shape: " + dialogProcessor.Selection.GetType();
                 }
+
+                viewPort.Invalidate();
             }
             if (toolStripButton1.Checked)
             {
@@ -205,7 +229,7 @@ namespace Draw
         /// Прихващане на преместването на мишката.
         /// Ако сме в режм на "влачене", то избрания елемент се транслира.
         /// </summary>
-        void ViewPortMouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        void ViewPortMouseMove(object sender, MouseEventArgs e)
         {
             if (dialogProcessor.IsDragging)
             {
@@ -261,10 +285,6 @@ namespace Draw
                 else if (ShapeToDraw is LineShape)
                 {
                     dialogProcessor.AddShape(new LineShape(new PointF(_p.X / zoom, _p.Y / zoom), new PointF(_p2.X / zoom, _p2.Y / zoom), penWidth, rect.Transparency));
-                }
-                else if (ShapeToDraw is ImageShape)
-                {
-                    dialogProcessor.AddShape(new ImageShape(FilePath, rect));
                 }
                 dialogProcessor.IsDrawingNewShape = false;
                 viewPort.Invalidate();
@@ -415,20 +435,11 @@ namespace Draw
             viewPort.Invalidate();
         }
 
-        private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
-        {
-           // viewPort.Location = new Point((viewPort.Location.X) - hScrollBar1.Value, viewPort.Location.Y);
-        }
 
         private void numericUpDown5_ValueChanged(object sender, EventArgs e)
         {
             dialogProcessor.SetNewRotation((float)numericUpDown5.Value);
             viewPort.Invalidate();
-        }
-
-        private void vScrollBar1_Scroll(object sender, ScrollEventArgs e)
-        {
-
         }
 
 
@@ -441,6 +452,23 @@ namespace Draw
                 ShapeToDraw = new ImageShape();
                 FilePath = open.FileName;
             }
+
+            dialogProcessor.AddShape(new ImageShape(FilePath, new RectangleShape(new RectangleF(0, 0, Image.FromFile(FilePath).Width / 2, Image.FromFile(FilePath).Height / 2))));
+            
+            layoutButtons.Add(new Button());
+            foreach (var item in layoutButtons)
+            {
+                item.BackgroundImage = Image.FromFile(FilePath);
+                item.FlatStyle = FlatStyle.Flat;
+                item.BackColor = Color.FromArgb(0, Color.White);
+                item.BackgroundImageLayout = ImageLayout.Zoom;
+                item.TextAlign = ContentAlignment.MiddleLeft;
+                item.Text = "layout" + layoutButtons.Count.ToString();
+                item.ForeColor = Color.White;
+                item.Size = new Size(layoutPanel.Width, 65);
+                layoutPanel.Controls.Add(item);
+            }
+
             viewPort.Invalidate();
         }
     }

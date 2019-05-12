@@ -45,7 +45,11 @@ namespace Draw.src.Model
         {
             if (BorderWidth != 0)
             {
-                grfx.DrawEllipse(new Pen(Color.FromArgb(Transparency, BorderColor), BorderWidth), Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+                grfx.DrawRectangle(new Pen(Color.FromArgb(Transparency, BorderColor), BorderWidth), Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);
+            }
+            if (IsSelected == true)
+            {
+                grfx.DrawRectangle(new Pen(Color.Red), Rectangle.X - 3, Rectangle.Y - 3, Rectangle.Width + 6, Rectangle.Height + 6);
             }
             grfx.DrawImage(Image.FromFile(Path), Rectangle);
         }

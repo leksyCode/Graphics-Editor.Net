@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace Draw
@@ -21,7 +22,7 @@ namespace Draw
         /// Избран елемент.
         /// </summary>
         public Shape Selection { get; set; }
-
+        public List<Shape> Selections { get; set; } = new List<Shape>();
         /// <summary>
         /// Дали в момента диалога е в състояние на "влачене" на избрания елемент.
         /// </summary>
@@ -72,67 +73,89 @@ namespace Draw
         /// <param name="p">Вектор на транслация.</param>
         public void TranslateTo(PointF p)
         {
-            if (Selection != null)
+            if (Selections != null)
             {
                 Selection.Location = new PointF(Selection.Location.X + p.X - LastLocation.X, Selection.Location.Y + p.Y - LastLocation.Y);
-                LastLocation = p;
+                LastLocation = p;          
             }
         }
 
         public void SetFillColor(Color color)
         {
-            if (Selection != null)
+            if (Selections != null)
             {
-                Selection.FillColor = color;
+                foreach (var item in Selections)
+                {
+                    item.FillColor = color;
+                }
             }
         }
 
         public void SetBorderColor(Color color)
         {
-            if (Selection != null)
+            if (Selections != null)
             {
-                Selection.BorderColor = color;
+                foreach (var item in Selections)
+                {
+                    item.BorderColor = color;
+                }        
             }
         }
 
         public void SetNewWidth(int width)
         {
-            if (Selection != null)
+            if (Selections != null)
             {
-                Selection.Width = width;
+                foreach (var item in Selections)
+                {
+                    item.Width = width;
+                }
             }
         }
 
         public void SetNewHeight(int height)
         {
-            if (Selection != null)
+            if (Selections != null)
             {
-                Selection.Height = height;
+                foreach (var item in Selections)
+                {
+                    item.Height = height;
+                }
+                
             }
         }
 
         public void SetNewBorderWidth(int borderWidth, Color updateColor)
         {
-            if (Selection != null)
+            if (Selections != null)
             {
-                Selection.BorderWidth = borderWidth;
-                Selection.BorderColor = updateColor;
+                foreach (var item in Selections)
+                {
+                    item.BorderWidth = borderWidth;
+                    item.BorderColor = updateColor;
+                }
             }
         }
 
         public void SetNewTransparency(int transparency)
         {
-            if (Selection != null)
+            if (Selections != null)
             {
-                Selection.Transparency = transparency;
+                foreach (var item in Selections)
+                {
+                    item.Transparency = transparency;
+                }
             }
         }
 
         public void SetNewRotation(float rotation)
-        {
-            if (Selection != null)
+        {  
+            if (Selections != null)
             {
-                Selection.Rotation = rotation;
+                foreach (var item in Selections)
+                {
+                    item.Rotation = rotation;
+                }
             }
         }
     }
