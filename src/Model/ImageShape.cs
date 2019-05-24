@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Draw.src.Model
 {
@@ -17,7 +18,7 @@ namespace Draw.src.Model
         }
 
 
-        public ImageShape(Shape shape)
+        public ImageShape(Shape shape) : base(shape)
         {
 
         }
@@ -41,8 +42,9 @@ namespace Draw.src.Model
         /// <summary>
         /// Частта, визуализираща конкретния примитив.
         /// </summary>
+
         public override void DrawSelf(Graphics grfx)
-        {
+        {            
             if (BorderWidth != 0)
             {
                 grfx.DrawRectangle(new Pen(Color.FromArgb(Transparency, BorderColor), BorderWidth), Rectangle.X, Rectangle.Y, Rectangle.Width, Rectangle.Height);

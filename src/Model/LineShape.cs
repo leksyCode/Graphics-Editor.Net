@@ -18,6 +18,11 @@ namespace Draw.src.Model
 
         }
 
+        public LineShape(Shape shape) : base(shape)
+        {
+
+        }
+
         public LineShape(PointF p1, PointF p2, int penwidth, int transparency)
         {
             P1 = p1;

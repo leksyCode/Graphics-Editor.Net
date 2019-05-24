@@ -73,11 +73,12 @@
             this.starButton = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.viewPort = new Draw.DoubleBufferedPanel();
             this.layoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.button1 = new System.Windows.Forms.Button();
-            this.label6 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.viewPort = new Draw.DoubleBufferedPanel();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             this.statusBar.SuspendLayout();
             this.speedMenu.SuspendLayout();
@@ -111,7 +112,8 @@
             // 
             this.fileButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
-            this.exitToolStripMenuItem});
+            this.exitToolStripMenuItem,
+            this.saveToolStripMenuItem});
             this.fileButton.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.fileButton.ForeColor = System.Drawing.Color.WhiteSmoke;
             this.fileButton.Name = "fileButton";
@@ -122,7 +124,7 @@
             // 
             this.openToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("openToolStripMenuItem.Image")));
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(118, 26);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -130,7 +132,7 @@
             // 
             this.exitToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("exitToolStripMenuItem.Image")));
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(118, 26);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItemClick);
             // 
@@ -148,7 +150,7 @@
             // 
             this.cancelActionToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("cancelActionToolStripMenuItem.Image")));
             this.cancelActionToolStripMenuItem.Name = "cancelActionToolStripMenuItem";
-            this.cancelActionToolStripMenuItem.Size = new System.Drawing.Size(172, 26);
+            this.cancelActionToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
             this.cancelActionToolStripMenuItem.Text = "Cancel action";
             this.cancelActionToolStripMenuItem.Click += new System.EventHandler(this.cancelActionToolStripMenuItem_Click);
             // 
@@ -166,7 +168,7 @@
             // 
             this.addImage.Image = ((System.Drawing.Image)(resources.GetObject("addImage.Image")));
             this.addImage.Name = "addImage";
-            this.addImage.Size = new System.Drawing.Size(155, 26);
+            this.addImage.Size = new System.Drawing.Size(184, 26);
             this.addImage.Text = "Add image";
             this.addImage.Click += new System.EventHandler(this.addImageToolStripMenuItem_Click);
             // 
@@ -183,7 +185,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(131, 26);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(180, 26);
             this.aboutToolStripMenuItem.Text = "About...";
             // 
             // statusBar
@@ -554,28 +556,6 @@
             this.panel1.Size = new System.Drawing.Size(588, 487);
             this.panel1.TabIndex = 0;
             // 
-            // viewPort
-            // 
-            this.viewPort.AutoScroll = true;
-            this.viewPort.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.viewPort.BackColor = System.Drawing.Color.White;
-            this.viewPort.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.viewPort.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.viewPort.Cursor = System.Windows.Forms.Cursors.Cross;
-            this.viewPort.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.viewPort.Location = new System.Drawing.Point(0, 0);
-            this.viewPort.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
-            this.viewPort.MinimumSize = new System.Drawing.Size(480, 720);
-            this.viewPort.Name = "viewPort";
-            this.viewPort.Size = new System.Drawing.Size(1280, 720);
-            this.viewPort.TabIndex = 6;
-            this.viewPort.Load += new System.EventHandler(this.viewPort_Load);
-            this.viewPort.Paint += new System.Windows.Forms.PaintEventHandler(this.ViewPortPaint);
-            this.viewPort.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.viewPort_KeyPress);
-            this.viewPort.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ViewPortMouseDown);
-            this.viewPort.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ViewPortMouseMove);
-            this.viewPort.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ViewPortMouseUp);
-            // 
             // layoutPanel
             // 
             this.layoutPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -605,6 +585,17 @@
             this.button1.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage;
             this.button1.UseVisualStyleBackColor = false;
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.label8.Location = new System.Drawing.Point(3, 67);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(234, 13);
+            this.label8.TabIndex = 5;
+            this.label8.Text = "label8";
+            // 
             // label6
             // 
             this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -617,16 +608,35 @@
             this.label6.TabIndex = 25;
             this.label6.Text = "Zoom: \r\n1x";
             // 
-            // label8
+            // viewPort
             // 
-            this.label8.AutoSize = true;
-            this.label8.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.label8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.label8.Location = new System.Drawing.Point(3, 67);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(234, 13);
-            this.label8.TabIndex = 5;
-            this.label8.Text = "label8";
+            this.viewPort.AutoScroll = true;
+            this.viewPort.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.viewPort.BackColor = System.Drawing.Color.White;
+            this.viewPort.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.viewPort.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.viewPort.Cursor = System.Windows.Forms.Cursors.Cross;
+            this.viewPort.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.viewPort.Location = new System.Drawing.Point(0, 0);
+            this.viewPort.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.viewPort.MinimumSize = new System.Drawing.Size(480, 720);
+            this.viewPort.Name = "viewPort";
+            this.viewPort.Size = new System.Drawing.Size(1280, 720);
+            this.viewPort.TabIndex = 6;
+            this.viewPort.Load += new System.EventHandler(this.viewPort_Load);
+            this.viewPort.Paint += new System.Windows.Forms.PaintEventHandler(this.ViewPortPaint);
+            this.viewPort.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ViewPort_KeyPress);
+            this.viewPort.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ViewPortMouseDown);
+            this.viewPort.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ViewPortMouseMove);
+            this.viewPort.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ViewPortMouseUp);
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("saveToolStripMenuItem.Image")));
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(184, 26);
+            this.saveToolStripMenuItem.Text = "Save as json";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -729,5 +739,6 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
     }
 }

@@ -43,8 +43,15 @@ namespace Draw
 
         public void AddShape(Shape shape)
         {
-            shape.BorderColor = MainForm.BorderColor;
-            shape.FillColor = MainForm.FillColor;
+            if (shape.FillColor == Color.Empty)
+            {               
+                shape.FillColor = MainForm.FillColor;
+            }
+            if (shape.BorderColor == Color.Empty)
+            {
+                shape.BorderColor = MainForm.BorderColor;
+            }
+            shape.Type = shape.GetType().Name;           
             ShapeList.Add(shape);
         }
 
@@ -73,7 +80,7 @@ namespace Draw
         /// <param name="p">Вектор на транслация.</param>
         public void TranslateTo(PointF p)
         {
-            if (Selections != null)
+            if (Selection != null)
             {
                 Selection.Location = new PointF(Selection.Location.X + p.X - LastLocation.X, Selection.Location.Y + p.Y - LastLocation.Y);
                 LastLocation = p;          
@@ -143,7 +150,7 @@ namespace Draw
             {
                 foreach (var item in Selections)
                 {
-                    item.Transparency = transparency;
+                     item.Transparency = transparency;
                 }
             }
         }

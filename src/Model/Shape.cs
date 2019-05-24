@@ -7,7 +7,7 @@ namespace Draw
 	/// <summary>
 	/// Базовия клас на примитивите, който съдържа общите характеристики на примитивите.
 	/// </summary>
-	public abstract class Shape
+	public  class Shape
 	{
 		#region Constructors
 		
@@ -23,7 +23,8 @@ namespace Draw
 
         public Shape(Shape shape)
 		{
-			this.Height = shape.Height;
+            Type = shape.Type;
+            this.Height = shape.Height;
 			this.Width = shape.Width;
 			this.Location = shape.Location;
 			this.rectangle = shape.rectangle;			
@@ -33,10 +34,17 @@ namespace Draw
             this.Transparency = shape.Transparency;
             this.Rotation = shape.Rotation;
             this.IsSelected = shape.IsSelected;
-		}
+        }
         #endregion
 
         #region Properties
+
+        private string type;
+        public virtual string Type
+        {
+            get { return type; }
+            set { type = value; }
+        }
 
         private bool isSelected;
         public virtual bool IsSelected

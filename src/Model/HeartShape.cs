@@ -15,12 +15,12 @@ namespace Draw.src.Model
 
         }
 
-        public HeartShape(Shape shape)
+        public HeartShape(RectangleShape rectangle) : base(rectangle)
         {
 
         }
 
-        public HeartShape(RectangleShape rectangle) : base(rectangle)
+        public HeartShape(Shape shape) : base(shape)
         {
 
         }

@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 
 namespace Draw
 {
@@ -39,7 +41,7 @@ namespace Draw
         private void viewPort_Load(object sender, EventArgs e)
         {
             viewPort.MouseWheel += new MouseEventHandler(viewPort_MouseWheel);
-            viewPort.KeyPress += new KeyPressEventHandler(viewPort_KeyPress);
+            viewPort.KeyPress += new KeyPressEventHandler(ViewPort_KeyPress);
             viewPortStaticWidth = viewPort.Width;
             viewPortStaticHeight = viewPort.Height;
         }
@@ -108,9 +110,9 @@ namespace Draw
             dialogProcessor.ReDraw(sender, e);
         }
 
-        private void viewPort_KeyPress(object sender, KeyPressEventArgs e)
+        private void ViewPort_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (ModifierKeys.HasFlag(Keys.Control) && e.KeyChar == 26 && dialogProcessor.ShapeList.Count != 0)
+            if (e.KeyChar == 26 && ModifierKeys.HasFlag(Keys.Control) && dialogProcessor.ShapeList.Count != 0)
             {
                 statusBar.Items[0].Text = "Last action: Ctrl + Z";
                 dialogProcessor.ShapeList.RemoveAt(dialogProcessor.ShapeList.Count - 1);
@@ -163,17 +165,20 @@ namespace Draw
             if (pickUpSpeedButton.Checked)
             {
                 dialogProcessor.Selection = dialogProcessor.ContainsPoint(e.Location);
-                if (ModifierKeys.HasFlag(Keys.Control))
+                //move up picked shape
+                dialogProcessor.ShapeList.Remove(dialogProcessor.Selection);
+                dialogProcessor.AddShape(dialogProcessor.Selection);
+                if (ModifierKeys.HasFlag(Keys.Control) && dialogProcessor.Selection != null)
                 {
-                    if (!dialogProcessor.Selections.Contains(dialogProcessor.Selection) && dialogProcessor.Selection != null)
+                    if (!dialogProcessor.Selections.Contains(dialogProcessor.Selection))
                     {
                         dialogProcessor.Selections.Add(dialogProcessor.Selection);
                         dialogProcessor.Selections[dialogProcessor.Selections.Count - 1].IsSelected = true;
                     }
                     else
                     {
-                        dialogProcessor.Selections.Remove(dialogProcessor.Selection);
                         dialogProcessor.ShapeList.Find(s => s.Equals(dialogProcessor.Selection)).IsSelected = false;
+                        dialogProcessor.Selections.Remove(dialogProcessor.Selection);
                     }
                 }
                 else
@@ -183,9 +188,8 @@ namespace Draw
                         dialogProcessor.Selections[i].IsSelected = false;
                         dialogProcessor.Selections.Remove(dialogProcessor.Selections[i]);
                     }
-                    
                 }
-
+                
                 if (dialogProcessor.Selection != null)
                 {
                     statusBar.Items[0].Text = "Последно действие: Селекция на примитив";
@@ -427,14 +431,52 @@ namespace Draw
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog open = new OpenFileDialog();
-            open.Filter = "Image Files(*.png; *.jpg; *.jpeg; *.gif; *.bmp)|*.png; *.jpg; *.jpeg; *.gif; *.bmp";
+            open.Filter = "Image Files(*.txt; *.json; )|*.txt; *.json; ";
             if (open.ShowDialog() == DialogResult.OK)
             {
-                viewPort.BackgroundImage = Image.FromFile(open.FileName);
+                //unfortunately, it is impossible to make desirialization from an abstract class; therefore,
+                //we initialize a new type of shape from an instance of shape.
+
+                var uploadList = JsonConvert.DeserializeObject<List<Shape>>(File.ReadAllText(open.FileName));
+                foreach (var item in uploadList)
+                {
+                    switch (item.Type)
+                    {
+                        case "RectangleShape":
+                            dialogProcessor.AddShape(new RectangleShape(item));
+                            break;
+                        case "EllipseShape":
+                            dialogProcessor.AddShape(new EllipseShape(item));
+                            break;
+                        case "HeartShape":
+                            dialogProcessor.AddShape(new HeartShape(item));
+                            break;
+                        case "ImageShape":
+                            dialogProcessor.AddShape(new ImageShape(item));
+                            break;
+                        case "LineShape":
+                            dialogProcessor.AddShape(new LineShape(item));
+                            break;
+                        case "StarShape":
+                            dialogProcessor.AddShape(new StarShape(item));
+                            break;
+                    }
+                }
             }
+
             viewPort.Invalidate();
         }
 
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {            
+            SaveFileDialog open = new SaveFileDialog();
+            open.Filter = "Image Files(*.json;)| *.json; ";
+            var json = JsonConvert.SerializeObject(dialogProcessor.ShapeList);
+            if (open.ShowDialog() == DialogResult.OK)
+            {  
+                File.WriteAllText(open.FileName, json);
+            }
+        }
 
         private void numericUpDown5_ValueChanged(object sender, EventArgs e)
         {
@@ -450,11 +492,9 @@ namespace Draw
             if (open.ShowDialog() == DialogResult.OK)
             {
                 ShapeToDraw = new ImageShape();
-                FilePath = open.FileName;
+                dialogProcessor.AddShape(new ImageShape(open.FileName, new RectangleShape(new RectangleF(0, 0, Image.FromFile(FilePath).Width / 2, Image.FromFile(FilePath).Height / 2))));
             }
 
-            dialogProcessor.AddShape(new ImageShape(FilePath, new RectangleShape(new RectangleF(0, 0, Image.FromFile(FilePath).Width / 2, Image.FromFile(FilePath).Height / 2))));
-            
             layoutButtons.Add(new Button());
             foreach (var item in layoutButtons)
             {
@@ -468,7 +508,6 @@ namespace Draw
                 item.Size = new Size(layoutPanel.Width, 65);
                 layoutPanel.Controls.Add(item);
             }
-
             viewPort.Invalidate();
         }
     }

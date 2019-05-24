@@ -13,6 +13,10 @@ namespace Draw.src.Model
         {
         }
 
+        public StarShape(Shape shape) : base(shape)
+        {
+
+        }
 
         public StarShape(RectangleShape rectangle) : base(rectangle)
         {

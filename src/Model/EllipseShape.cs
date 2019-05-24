@@ -14,7 +14,7 @@ namespace Draw.src.Model
 
         }
 
-        public EllipseShape(Shape shape)
+        public EllipseShape(Shape shape) : base(shape)
         {
 
         }

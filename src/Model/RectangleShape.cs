@@ -8,13 +8,18 @@ namespace Draw
 	/// </summary>
 	public class RectangleShape : Shape
 	{
-		#region Constructor
-
+        #region Constructor
         public RectangleShape()
         {
+
         }
-		
-		public RectangleShape(RectangleF rect) : base(rect)
+
+        public RectangleShape(Shape shape) : base(shape)
+        {
+
+        }
+
+        public RectangleShape(RectangleF rect) : base(rect)
 		{
 		}
 		
