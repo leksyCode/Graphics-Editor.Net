@@ -20,7 +20,7 @@ namespace Draw.src.Model
 
         public ImageShape(Shape shape) : base(shape)
         {
-
+           
         }
 
         public ImageShape(string path, RectangleShape rectangle) : base(rectangle)

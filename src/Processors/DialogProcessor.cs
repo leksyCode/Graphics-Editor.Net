@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 
 namespace Draw
@@ -51,6 +50,7 @@ namespace Draw
             {
                 shape.BorderColor = MainForm.BorderColor;
             }
+            // To know the shape type after deserialization from json file
             shape.Type = shape.GetType().Name;           
             ShapeList.Add(shape);
         }

@@ -123,6 +123,7 @@ namespace Draw
             set { rotation = value; }
         }
 
+
         #endregion
 
 

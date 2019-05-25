@@ -3,9 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.IO;
 using System.Windows.Forms;
-using Newtonsoft.Json;
+using Draw.src.Common;
 
 namespace Draw
 {
@@ -19,7 +18,6 @@ namespace Draw
         public static Color BorderColor { get; set; } = new Color();
         public static Shape ShapeToDraw { get; set; } = new RectangleShape();
         public static int viewPortStaticWidth, viewPortStaticHeight;
-        public static string FilePath;
         public static float zoom = 1;
         private Point _p, _p2;
         private Rectangle _r;
@@ -35,7 +33,6 @@ namespace Draw
         public MainForm()
         {
             InitializeComponent();
-            layoutButtons.Add(button1);
         }
 
         private void viewPort_Load(object sender, EventArgs e)
@@ -44,15 +41,7 @@ namespace Draw
             viewPort.KeyPress += new KeyPressEventHandler(ViewPort_KeyPress);
             viewPortStaticWidth = viewPort.Width;
             viewPortStaticHeight = viewPort.Height;
-        }
-
-        /// <summary>
-        /// Изход от програмата. Затваря главната форма, а с това и програмата.
-        /// </summary>
-        void ExitToolStripMenuItemClick(object sender, EventArgs e)
-        {
-            Close();
-        }
+        }      
 
         /// <summary>
         /// Събитието, което се прихваща, за да се превизуализира при изменение на модела.
@@ -61,6 +50,7 @@ namespace Draw
         {
             if (dialogProcessor.IsDrawingNewShape)
             {
+                // visualization of the drawing effects on a given rectangle (border) of shape
                 if (ShapeToDraw is EllipseShape)
                 {
                     e.Graphics.DrawEllipse(new Pen(Color.FromArgb(95, BorderColor), penWidth), _r);
@@ -120,7 +110,7 @@ namespace Draw
             }
         }
 
-        private void cancelActionToolStripMenuItem_Click(object sender, EventArgs e)
+        private void cancelActionButton_Click(object sender, EventArgs e)
         {
             statusBar.Items[0].Text = "Last action: Ctrl + Z";
             dialogProcessor.ShapeList.Remove(dialogProcessor.ShapeList[dialogProcessor.ShapeList.Count - 1]);
@@ -129,6 +119,7 @@ namespace Draw
 
         private void viewPort_MouseWheel(object sender, MouseEventArgs e)
         {
+            // Sets the zoom to be used in the future
             if (ModifierKeys.HasFlag(Keys.Control))
             {
                 if (e.Delta > 0)
@@ -148,7 +139,7 @@ namespace Draw
                     viewPort.Width = (int)(viewPortStaticWidth * zoom);
                     viewPort.Height = (int)(viewPortStaticHeight * zoom);
                 }
-                label6.Text = "Zoom:\n" + (zoom * 100).ToString() + "%";
+                zoomInfoLabel.Text = "Zoom:\n" + (zoom * 100).ToString() + "%";
                 viewPort.Invalidate();
             }
         }
@@ -165,54 +156,51 @@ namespace Draw
             if (pickUpSpeedButton.Checked)
             {
                 dialogProcessor.Selection = dialogProcessor.ContainsPoint(e.Location);
-                //move up picked shape
-                dialogProcessor.ShapeList.Remove(dialogProcessor.Selection);
-                dialogProcessor.AddShape(dialogProcessor.Selection);
-                if (ModifierKeys.HasFlag(Keys.Control) && dialogProcessor.Selection != null)
+                if (dialogProcessor.Selection != null)
                 {
-                    if (!dialogProcessor.Selections.Contains(dialogProcessor.Selection))
+                    //move picked shape to top of list
+                    dialogProcessor.ShapeList.Remove(dialogProcessor.Selection);
+                    dialogProcessor.AddShape(dialogProcessor.Selection);
+
+                    //  Add and remove in multiple selection using Ctrl 
+                    if (ModifierKeys.HasFlag(Keys.Control))
                     {
-                        dialogProcessor.Selections.Add(dialogProcessor.Selection);
-                        dialogProcessor.Selections[dialogProcessor.Selections.Count - 1].IsSelected = true;
+                        if (!dialogProcessor.Selections.Contains(dialogProcessor.Selection))
+                        {
+                            dialogProcessor.Selections.Add(dialogProcessor.Selection);
+                            dialogProcessor.Selections[dialogProcessor.Selections.Count - 1].IsSelected = true;
+                        }
+                        else
+                        {
+                            dialogProcessor.ShapeList.Find(s => s.Equals(dialogProcessor.Selection)).IsSelected = false;
+                            dialogProcessor.Selections.Remove(dialogProcessor.Selection);
+                        }
                     }
                     else
                     {
-                        dialogProcessor.ShapeList.Find(s => s.Equals(dialogProcessor.Selection)).IsSelected = false;
-                        dialogProcessor.Selections.Remove(dialogProcessor.Selection);
+                        // When pressed without the shapes - remove all selections
+                        for (int i = 0; i < dialogProcessor.Selections.Count - 1; i++)
+                        {
+                            dialogProcessor.Selections[i].IsSelected = false;
+                            dialogProcessor.Selections.Remove(dialogProcessor.Selections[i]);
+                        }
                     }
-                }
-                else
-                {
-                    for (int i = 0; i < dialogProcessor.Selections.Count - 1; i++)
-                    {
-                        dialogProcessor.Selections[i].IsSelected = false;
-                        dialogProcessor.Selections.Remove(dialogProcessor.Selections[i]);
-                    }
-                }
-                
-                if (dialogProcessor.Selection != null)
-                {
-                    statusBar.Items[0].Text = "Последно действие: Селекция на примитив";
                     dialogProcessor.IsDragging = true;
                     dialogProcessor.LastLocation = e.Location;
-                    //numericUpDown1.Value = dialogProcessor.Selection.BorderWidth;
-                    //numericUpDown2.Value = (decimal)dialogProcessor.Selection.Width;
-                    //numericUpDown3.Value = (decimal)dialogProcessor.Selection.Height;
-                    //numericUpDown4.Value = dialogProcessor.Selection.Transparency;
-                    //numericUpDown5.Value = (decimal)dialogProcessor.Selection.Rotation;
 
-                    label8.Text = dialogProcessor.Selection.BorderColor.ToString()
-                    + "\n" + dialogProcessor.Selection.FillColor.ToString()
-                    + "\n width: " + dialogProcessor.Selection.Width + "\n height: " + dialogProcessor.Selection.Height
-                    + "\n border: " + dialogProcessor.Selection.BorderWidth.ToString() + "px"
-                    + "\n transparency: " + dialogProcessor.Selection.Transparency + "\n"
-                    + "\n location: " + dialogProcessor.Selection.Location.ToString() + "\n"
-                    + " shape: " + dialogProcessor.Selection.GetType();
-                }
-
+                    // Output info
+                    statusBar.Items[0].Text = "Последно действие: Селекция на примитив";                   
+                    infoLabel.Text = "Fill " + dialogProcessor.Selection.FillColor.ToString()
+                    + " Border " + dialogProcessor.Selection.BorderColor.ToString() 
+                    + "\n width: " + dialogProcessor.Selection.Width + "px;" + " height: " + dialogProcessor.Selection.Height + "px;"
+                    + "\n border: " + dialogProcessor.Selection.BorderWidth.ToString() + "px;"
+                    + " transparency: " + dialogProcessor.Selection.Transparency + "\n"
+                    + " location: " + dialogProcessor.Selection.Location.ToString() + "\n"
+                    + " shape: " + dialogProcessor.Selection.GetType().Name;
+                } 
                 viewPort.Invalidate();
             }
-            if (toolStripButton1.Checked)
+            if (pickUpButton.Checked)
             {
                 dialogProcessor.IsDrawingNewShape = true;
                 _p = e.Location;
@@ -237,8 +225,12 @@ namespace Draw
         {
             if (dialogProcessor.IsDragging)
             {
-                if (dialogProcessor.Selection != null) statusBar.Items[0].Text = "Последно действие: Влачене";
-                dialogProcessor.TranslateTo(e.Location);
+                if (dialogProcessor.Selection != null)
+                {
+                    statusBar.Items[0].Text = "Последно действие: Влачене";
+                    dialogProcessor.TranslateTo(e.Location);
+                }
+                   
                 viewPort.Invalidate();
             }
 
@@ -246,10 +238,13 @@ namespace Draw
             {
                 if (e.Button == MouseButtons.Left)
                 {
-                    statusBar.Items[0].Text = "Last action: Drawing new shape";
+                    // Create a bounding rectangle on the movement of the mouse which suports to draw shapes in viewPort Paint                   
                     _r = new Rectangle(new Point(Math.Min(_p.X, e.Location.X), Math.Min(_p.Y, e.Location.Y)),
                      new Size(Math.Abs(_p.X - e.Location.X), Math.Abs(_p.Y - e.Location.Y)));
+
+                    // The same, but for LineShape
                     _p2 = e.Location;
+                    statusBar.Items[0].Text = "Last action: Drawing new shape";
                     viewPort.Invalidate();
                 }
             }
@@ -259,17 +254,20 @@ namespace Draw
         /// Прихващане на отпускането на бутона на мишката.
         /// Излизаме от режим "влачене".
         /// </summary>
-        void ViewPortMouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        void ViewPortMouseUp(object sender, MouseEventArgs e)
         {
+
             dialogProcessor.IsDragging = false;
             if (dialogProcessor.IsDrawingNewShape)
             {
+                // Specify a rectangle as the basis for creating a shape with zoom scale of viewPort
                 RectangleShape rect = new RectangleShape(new RectangleF(new PointF(Math.Min(_p.X, e.Location.X) / zoom, Math.Min(_p.Y, e.Location.Y) / zoom),
                 new SizeF(Math.Abs(_p.X - e.Location.X) / zoom, Math.Abs(_p.Y - e.Location.Y) / zoom)));
 
                 rect.BorderWidth = penWidth;
-                rect.Transparency = (int)numericUpDown4.Value;
-                rect.Rotation = (float) numericUpDown5.Value;
+                rect.Transparency = (int)transparencyPicker.Value;
+                rect.Rotation = (float) rotationPicker.Value;
+
                 if (ShapeToDraw is RectangleShape)
                 {
                     dialogProcessor.AddShape(rect);
@@ -296,26 +294,8 @@ namespace Draw
 
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
-        {
 
-        }
-
-
-
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void toolStripSplitButton1_ButtonClick(object sender, EventArgs e)
-        {
-
-        }
-
-
-
-        private void fillColorToolStripMenuItem_Click(object sender, EventArgs e)
+        private void fillColorButton_Click(object sender, EventArgs e)
         {
             colorButton.Text = "Fill";
             colorBox.BackColor = FillColor;
@@ -323,20 +303,16 @@ namespace Draw
         }
 
 
-        private void borderColorToolStripMenuItem_Click(object sender, EventArgs e)
+        private void borderColorButton_Click(object sender, EventArgs e)
         {
             colorButton.Text = "Border";
             colorBox.BackColor = BorderColor;
             viewPort.Invalidate();
         }
 
-        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
         private void colorBox_Click(object sender, EventArgs e)
         {
+            // Change selected color or button
             if (colorDialog1.ShowDialog() == DialogResult.OK)
             {
                 colorBox.BackColor = colorDialog1.Color;
@@ -354,21 +330,21 @@ namespace Draw
             }
         }
 
-        private void toolStripButton1_Click_1(object sender, EventArgs e)
+        private void drawButton(object sender, EventArgs e)
         {
             pickUpSpeedButton.Checked = false;
             eraseButton.Checked = false;
         }
 
-        private void pickUpSpeedButton_Click(object sender, EventArgs e)
+        private void pickUpButton_Click(object sender, EventArgs e)
         {
-            toolStripButton1.Checked = false;
+            pickUpButton.Checked = false;
             eraseButton.Checked = false;
         }
 
         private void eraseButton_Click(object sender, EventArgs e)
         {
-            toolStripButton1.Checked = false;
+            pickUpButton.Checked = false;
             pickUpSpeedButton.Checked = false;
         }
 
@@ -402,113 +378,124 @@ namespace Draw
             shapeButton.Image = lineButton.Image;
         }
 
-        private void numericUpDown3_ValueChanged(object sender, EventArgs e)
+        private void heightPicker_ValueChanged(object sender, EventArgs e)
         {
-            dialogProcessor.SetNewHeight((int)numericUpDown3.Value);
+            dialogProcessor.SetNewHeight((int)heightPicker.Value);
             viewPort.Invalidate();
         }
 
-        private void numericUpDown2_ValueChanged(object sender, EventArgs e)
+        private void widthPicker_ValueChanged(object sender, EventArgs e)
         {
-            dialogProcessor.SetNewWidth((int)numericUpDown2.Value);
+            dialogProcessor.SetNewWidth((int)widthPicker.Value);
             viewPort.Invalidate();
         }
 
 
-        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        private void penWidthPicker_ValueChanged(object sender, EventArgs e)
         {
-            penWidth = Convert.ToInt32(numericUpDown1.Value);
+            penWidth = Convert.ToInt32(penWidthPicker.Value);
             dialogProcessor.SetNewBorderWidth(penWidth, BorderColor);
             viewPort.Invalidate();
         }
      
-        private void numericUpDown4_ValueChanged(object sender, EventArgs e)
+        private void transparencyPicker_ValueChanged(object sender, EventArgs e)
         {
-            dialogProcessor.SetNewTransparency((int)numericUpDown4.Value);
+            dialogProcessor.SetNewTransparency((int)transparencyPicker.Value);
             viewPort.Invalidate();
         }
 
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void openFileDrawButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog open = new OpenFileDialog();
-            open.Filter = "Image Files(*.txt; *.json; )|*.txt; *.json; ";
+            open.Filter = "Image Files(*.draw;)| *.draw; ";
             if (open.ShowDialog() == DialogResult.OK)
             {
-                //unfortunately, it is impossible to make desirialization from an abstract class; therefore,
-                //we initialize a new type of shape from an instance of shape.
-
-                var uploadList = JsonConvert.DeserializeObject<List<Shape>>(File.ReadAllText(open.FileName));
-                foreach (var item in uploadList)
-                {
-                    switch (item.Type)
-                    {
-                        case "RectangleShape":
-                            dialogProcessor.AddShape(new RectangleShape(item));
-                            break;
-                        case "EllipseShape":
-                            dialogProcessor.AddShape(new EllipseShape(item));
-                            break;
-                        case "HeartShape":
-                            dialogProcessor.AddShape(new HeartShape(item));
-                            break;
-                        case "ImageShape":
-                            dialogProcessor.AddShape(new ImageShape(item));
-                            break;
-                        case "LineShape":
-                            dialogProcessor.AddShape(new LineShape(item));
-                            break;
-                        case "StarShape":
-                            dialogProcessor.AddShape(new StarShape(item));
-                            break;
-                    }
-                }
+                Opener.OpenFileAsDraw(open.FileName, dialogProcessor);
             }
 
+            statusBar.Items[0].Text = "Last action: Uploading project file as draw";
             viewPort.Invalidate();
         }
 
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
-        {            
-            SaveFileDialog open = new SaveFileDialog();
-            open.Filter = "Image Files(*.json;)| *.json; ";
-            var json = JsonConvert.SerializeObject(dialogProcessor.ShapeList);
-            if (open.ShowDialog() == DialogResult.OK)
-            {  
-                File.WriteAllText(open.FileName, json);
-            }
-        }
-
-        private void numericUpDown5_ValueChanged(object sender, EventArgs e)
+        private void openFilePngButton_Click(object sender, EventArgs e)
         {
-            dialogProcessor.SetNewRotation((float)numericUpDown5.Value);
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "Image Files(*.png;)| *.png; ";
+            if (open.ShowDialog() == DialogResult.OK)
+            {
+                Opener.OpenFileAsPng(open.FileName, viewPort);
+            }
             viewPort.Invalidate();
         }
 
 
-        private void addImageToolStripMenuItem_Click(object sender, EventArgs e)
+        private void saveFileAsDrawButton_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "Image Files(*.draw;)| *.draw; ";
+            if (save.ShowDialog() == DialogResult.OK)
+            {
+                Saver.SaveFileAsDraw(save.FileName, dialogProcessor.ShapeList);
+            }
+            statusBar.Items[0].Text = "Last action: Save project file as draw";
+        }
+
+        private void saveFileAsPngButton_Click(object sender, EventArgs e)
+        {
+            //Drawing our viewPort control to bitmap and then save it
+            Bitmap bitmap = new Bitmap(viewPortStaticWidth, viewPortStaticHeight);
+            viewPort.DrawToBitmap(bitmap, new Rectangle(0, 0, viewPortStaticWidth, viewPortStaticHeight));
+
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "Image Files(*.png;)| *.png; ";
+            if (save.ShowDialog() == DialogResult.OK)
+            {
+                Saver.SaveFileAsPng(save.FileName, bitmap);
+            }          
+            statusBar.Items[0].Text = "Last action: Save project file as png";
+        }
+
+
+        private void rotationPicker_ValueChanged(object sender, EventArgs e)
+        {
+            dialogProcessor.SetNewRotation((float)rotationPicker.Value);
+            viewPort.Invalidate();
+        }
+
+
+        private void addImageButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog open = new OpenFileDialog();
             open.Filter = "Image Files(*.png; *.jpg; *.jpeg; *.gif; *.bmp)|*.png; *.jpg; *.jpeg; *.gif; *.bmp";
             if (open.ShowDialog() == DialogResult.OK)
             {
                 ShapeToDraw = new ImageShape();
-                dialogProcessor.AddShape(new ImageShape(open.FileName, new RectangleShape(new RectangleF(0, 0, Image.FromFile(FilePath).Width / 2, Image.FromFile(FilePath).Height / 2))));
+                dialogProcessor.AddShape(new ImageShape(open.FileName, new RectangleShape(new RectangleF(0, 0, Image.FromFile(open.FileName).Width / 2, Image.FromFile(open.FileName).Height / 2))));
             }
 
-            layoutButtons.Add(new Button());
-            foreach (var item in layoutButtons)
-            {
-                item.BackgroundImage = Image.FromFile(FilePath);
-                item.FlatStyle = FlatStyle.Flat;
-                item.BackColor = Color.FromArgb(0, Color.White);
-                item.BackgroundImageLayout = ImageLayout.Zoom;
-                item.TextAlign = ContentAlignment.MiddleLeft;
-                item.Text = "layout" + layoutButtons.Count.ToString();
-                item.ForeColor = Color.White;
-                item.Size = new Size(layoutPanel.Width, 65);
-                layoutPanel.Controls.Add(item);
-            }
+            //layoutButtons.Add(new Button());
+            //foreach (var item in layoutButtons)
+            //{
+            //    item.BackgroundImage = Image.FromFile(open.FileName);
+            //    item.FlatStyle = FlatStyle.Flat;
+            //    item.BackColor = Color.FromArgb(0, Color.White);
+            //    item.BackgroundImageLayout = ImageLayout.Zoom;
+            //    item.TextAlign = ContentAlignment.MiddleLeft;
+            //    item.Text = "layout" + layoutButtons.Count.ToString();
+            //    item.ForeColor = Color.White;
+            //    item.Size = new Size(layoutPanel.Width, 65);
+            //    layoutPanel.Controls.Add(item);
+            //}
             viewPort.Invalidate();
+        }
+
+        /// <summary>
+        /// Изход от програмата. Затваря главната форма, а с това и програмата.
+        /// </summary>
+        void ExitMenuButton(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }

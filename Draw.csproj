@@ -49,6 +49,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="src\AssemblyInfo.cs" />
+    <Compile Include="src\Common\Opener.cs" />
+    <Compile Include="src\Common\Saver.cs" />
     <Compile Include="src\GUI\DoubleBufferedPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
