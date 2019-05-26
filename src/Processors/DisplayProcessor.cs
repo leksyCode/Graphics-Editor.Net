@@ -10,12 +10,12 @@ namespace Draw
 	/// </summary>
 	public class DisplayProcessor
 	{
-		#region Constructor
-		
-		public DisplayProcessor()
+        #region Constructor       
+
+        public DisplayProcessor()
 		{
-		}
-        public List<Shape> ShapeList { get; set; } = new List<Shape>();
+        }
+        
         #endregion
 
         #region Drawing
@@ -23,11 +23,11 @@ namespace Draw
         /// <summary>
         /// Прерисува всички елементи в shapeList върху e.Graphics
         /// </summary>
-        public void ReDraw(object sender, PaintEventArgs e)
-		{
+        public void ReDraw(object sender, PaintEventArgs e, DoubleBufferedPanel vPort)
+        {
 			e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;            
             e.Graphics.ScaleTransform(MainForm.zoom, MainForm.zoom);
-			Draw(e.Graphics);
+			Draw(e.Graphics, vPort);
 		}
 		
 		/// <summary>
@@ -35,9 +35,10 @@ namespace Draw
 		/// Обхождане на всички елементи в списъка и извикване на визуализиращия им метод.
 		/// </summary>
 		/// <param name="grfx">Къде да се извърши визуализацията.</param>
-		public virtual void Draw(Graphics grfx)
+		public virtual void Draw(Graphics grfx, DoubleBufferedPanel vPort)
 		{  
-            foreach (Shape item in ShapeList){
+            foreach (Shape item in vPort.ShapeList)
+            {
 				DrawShape(grfx, item);
 			}
         }
@@ -49,10 +50,18 @@ namespace Draw
 		/// <param name="item">Елемент за визуализиране.</param>
 		public virtual void DrawShape(Graphics grfx, Shape item)
         {
-            //grfx.RotateTransform(item.Rotation);
-            item.DrawSelf(grfx);
-            //grfx.ResetTransform();
-
+            if (item.Rotation != 0)
+            {
+                Matrix matrix = new Matrix();
+                matrix.RotateAt(item.Rotation, new PointF(item.Location.X + item.Width/2, item.Location.Y + item.Height/2));                
+                grfx.MultiplyTransform(matrix);          
+                item.DrawSelf(grfx);
+                grfx.ResetTransform();
+            }
+            else
+            {
+                item.DrawSelf(grfx);
+            }
         }
 		
 		#endregion

@@ -1,4 +1,6 @@
-﻿namespace Draw
+﻿using System.Windows.Forms;
+
+namespace Draw
 {
 	partial class MainForm
 	{
@@ -31,6 +33,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mainMenu = new System.Windows.Forms.MenuStrip();
             this.fileButton = new System.Windows.Forms.ToolStripMenuItem();
+            this.newProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileButton = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDrawButton = new System.Windows.Forms.ToolStripMenuItem();
             this.openFilePngButton = new System.Windows.Forms.ToolStripMenuItem();
@@ -81,7 +84,9 @@
             this.layoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.infoLabel = new System.Windows.Forms.Label();
             this.zoomInfoLabel = new System.Windows.Forms.Label();
-            this.viewPort = new Draw.DoubleBufferedPanel();
+            this.tabMenu = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.mainMenu.SuspendLayout();
             this.statusBar.SuspendLayout();
             this.speedMenu.SuspendLayout();
@@ -92,8 +97,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.transparencyPicker)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rotationPicker)).BeginInit();
             this.toolStrip1.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.layoutPanel.SuspendLayout();
+            this.tabMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // mainMenu
@@ -114,6 +119,7 @@
             // fileButton
             // 
             this.fileButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newProjectToolStripMenuItem,
             this.openFileButton,
             this.saveFileButton,
             this.exitToolStripMenuItem});
@@ -123,6 +129,14 @@
             this.fileButton.Size = new System.Drawing.Size(46, 25);
             this.fileButton.Text = "File";
             // 
+            // newProjectToolStripMenuItem
+            // 
+            this.newProjectToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("newProjectToolStripMenuItem.Image")));
+            this.newProjectToolStripMenuItem.Name = "newProjectToolStripMenuItem";
+            this.newProjectToolStripMenuItem.Size = new System.Drawing.Size(164, 26);
+            this.newProjectToolStripMenuItem.Text = "New project";
+            this.newProjectToolStripMenuItem.Click += new System.EventHandler(this.newProjectButton_Click);
+            // 
             // openFileButton
             // 
             this.openFileButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -130,7 +144,7 @@
             this.openFilePngButton});
             this.openFileButton.Image = ((System.Drawing.Image)(resources.GetObject("openFileButton.Image")));
             this.openFileButton.Name = "openFileButton";
-            this.openFileButton.Size = new System.Drawing.Size(152, 26);
+            this.openFileButton.Size = new System.Drawing.Size(164, 26);
             this.openFileButton.Text = "Open file...";
             // 
             // openFileDrawButton
@@ -154,7 +168,7 @@
             this.pngToolStripMenuItem1});
             this.saveFileButton.Image = ((System.Drawing.Image)(resources.GetObject("saveFileButton.Image")));
             this.saveFileButton.Name = "saveFileButton";
-            this.saveFileButton.Size = new System.Drawing.Size(152, 26);
+            this.saveFileButton.Size = new System.Drawing.Size(164, 26);
             this.saveFileButton.Text = "Save as...";
             // 
             // drawToolStripMenuItem1
@@ -175,7 +189,7 @@
             // 
             this.exitToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("exitToolStripMenuItem.Image")));
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(164, 26);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitMenuButton);
             // 
@@ -327,14 +341,14 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(53, 6);
             // 
-            // toolStripButton1
+            // pickUpButton
             // 
             this.pickUpButton.AutoSize = false;
             this.pickUpButton.CheckOnClick = true;
             this.pickUpButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.pickUpButton.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
+            this.pickUpButton.Image = ((System.Drawing.Image)(resources.GetObject("pickUpButton.Image")));
             this.pickUpButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.pickUpButton.Name = "toolStripButton1";
+            this.pickUpButton.Name = "pickUpButton";
             this.pickUpButton.Size = new System.Drawing.Size(45, 35);
             this.pickUpButton.Text = "toolStripButton1";
             this.pickUpButton.Click += new System.EventHandler(this.drawButton);
@@ -374,7 +388,7 @@
             // 
             // penWidthPicker
             // 
-            this.penWidthPicker.Location = new System.Drawing.Point(205, 31);
+            this.penWidthPicker.Location = new System.Drawing.Point(206, 36);
             this.penWidthPicker.Name = "penWidthPicker";
             this.penWidthPicker.Size = new System.Drawing.Size(49, 20);
             this.penWidthPicker.TabIndex = 7;
@@ -397,7 +411,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.BackColor = System.Drawing.Color.Tan;
-            this.label2.Location = new System.Drawing.Point(131, 34);
+            this.label2.Location = new System.Drawing.Point(132, 39);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(68, 13);
             this.label2.TabIndex = 10;
@@ -407,7 +421,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.BackColor = System.Drawing.Color.Tan;
-            this.label3.Location = new System.Drawing.Point(260, 34);
+            this.label3.Location = new System.Drawing.Point(261, 39);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(35, 13);
             this.label3.TabIndex = 11;
@@ -417,7 +431,7 @@
             // 
             this.label4.AutoSize = true;
             this.label4.BackColor = System.Drawing.Color.Tan;
-            this.label4.Location = new System.Drawing.Point(370, 34);
+            this.label4.Location = new System.Drawing.Point(371, 39);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(39, 13);
             this.label4.TabIndex = 12;
@@ -427,7 +441,7 @@
             // 
             this.label5.AutoSize = true;
             this.label5.BackColor = System.Drawing.Color.Tan;
-            this.label5.Location = new System.Drawing.Point(479, 33);
+            this.label5.Location = new System.Drawing.Point(480, 38);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(71, 13);
             this.label5.TabIndex = 13;
@@ -435,7 +449,7 @@
             // 
             // widthPicker
             // 
-            this.widthPicker.Location = new System.Drawing.Point(301, 31);
+            this.widthPicker.Location = new System.Drawing.Point(302, 36);
             this.widthPicker.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -448,7 +462,7 @@
             // 
             // heightPicker
             // 
-            this.heightPicker.Location = new System.Drawing.Point(415, 31);
+            this.heightPicker.Location = new System.Drawing.Point(416, 36);
             this.heightPicker.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -461,7 +475,7 @@
             // 
             // transparencyPicker
             // 
-            this.transparencyPicker.Location = new System.Drawing.Point(556, 31);
+            this.transparencyPicker.Location = new System.Drawing.Point(557, 36);
             this.transparencyPicker.Maximum = new decimal(new int[] {
             255,
             0,
@@ -490,7 +504,7 @@
             // 
             // rotationPicker
             // 
-            this.rotationPicker.Location = new System.Drawing.Point(646, 31);
+            this.rotationPicker.Location = new System.Drawing.Point(647, 36);
             this.rotationPicker.Maximum = new decimal(new int[] {
             360,
             0,
@@ -510,7 +524,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.BackColor = System.Drawing.Color.Tan;
-            this.label7.Location = new System.Drawing.Point(605, 33);
+            this.label7.Location = new System.Drawing.Point(606, 38);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(45, 13);
             this.label7.TabIndex = 20;
@@ -594,10 +608,9 @@
             this.panel1.AutoScroll = true;
             this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.panel1.BackColor = System.Drawing.Color.LightGray;
-            this.panel1.Controls.Add(this.viewPort);
-            this.panel1.Location = new System.Drawing.Point(55, 55);
+            this.panel1.Location = new System.Drawing.Point(55, 85);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(588, 487);
+            this.panel1.Size = new System.Drawing.Size(588, 457);
             this.panel1.TabIndex = 0;
             // 
             // layoutPanel
@@ -605,23 +618,24 @@
             this.layoutPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.layoutPanel.BackColor = System.Drawing.Color.SlateGray;
+            this.layoutPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.layoutPanel.Controls.Add(this.infoLabel);
             this.layoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.layoutPanel.Location = new System.Drawing.Point(646, 55);
+            this.layoutPanel.Location = new System.Drawing.Point(646, 62);
             this.layoutPanel.Name = "layoutPanel";
-            this.layoutPanel.Size = new System.Drawing.Size(239, 484);
+            this.layoutPanel.Size = new System.Drawing.Size(239, 480);
             this.layoutPanel.TabIndex = 24;
             // 
             // infoLabel
             // 
             this.infoLabel.AutoSize = true;
-            this.infoLabel.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.infoLabel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.infoLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.infoLabel.Location = new System.Drawing.Point(3, 0);
             this.infoLabel.Name = "infoLabel";
-            this.infoLabel.Size = new System.Drawing.Size(35, 13);
+            this.infoLabel.Size = new System.Drawing.Size(28, 13);
             this.infoLabel.TabIndex = 5;
-            this.infoLabel.Text = "label8";
+            this.infoLabel.Text = "Info:";
             // 
             // zoomInfoLabel
             // 
@@ -635,32 +649,43 @@
             this.zoomInfoLabel.TabIndex = 25;
             this.zoomInfoLabel.Text = "Zoom: \r\n1x";
             // 
-            // viewPort
+            // tabMenu
             // 
-            this.viewPort.AutoScroll = true;
-            this.viewPort.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.viewPort.BackColor = System.Drawing.Color.White;
-            this.viewPort.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.viewPort.Cursor = System.Windows.Forms.Cursors.Cross;
-            this.viewPort.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.viewPort.Location = new System.Drawing.Point(0, 0);
-            this.viewPort.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
-            this.viewPort.MinimumSize = new System.Drawing.Size(480, 720);
-            this.viewPort.Name = "viewPort";
-            this.viewPort.Size = new System.Drawing.Size(1280, 720);
-            this.viewPort.TabIndex = 6;
-            this.viewPort.Load += new System.EventHandler(this.viewPort_Load);
-            this.viewPort.Paint += new System.Windows.Forms.PaintEventHandler(this.ViewPortPaint);
-            this.viewPort.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ViewPort_KeyPress);
-            this.viewPort.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ViewPortMouseDown);
-            this.viewPort.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ViewPortMouseMove);
-            this.viewPort.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ViewPortMouseUp);
+            this.tabMenu.Controls.Add(this.tabPage1);
+            this.tabMenu.Controls.Add(this.tabPage2);
+            this.tabMenu.Location = new System.Drawing.Point(55, 65);
+            this.tabMenu.Name = "tabMenu";
+            this.tabMenu.SelectedIndex = 0;
+            this.tabMenu.Size = new System.Drawing.Size(585, 20);
+            this.tabMenu.TabIndex = 26;
+            this.tabMenu.SelectedIndexChanged += new System.EventHandler(this.tabMenu_SelectedIndexChanged);
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(577, 0);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "New project";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage1";
+            this.tabPage2.Size = new System.Drawing.Size(577, 0);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "New project1";
+            this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.LightGray;
             this.ClientSize = new System.Drawing.Size(885, 564);
+            this.Controls.Add(this.tabMenu);
             this.Controls.Add(this.zoomInfoLabel);
             this.Controls.Add(this.layoutPanel);
             this.Controls.Add(this.rotationPicker);
@@ -700,15 +725,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.rotationPicker)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
-            this.panel1.ResumeLayout(false);
             this.layoutPanel.ResumeLayout(false);
             this.layoutPanel.PerformLayout();
+            this.tabMenu.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
 		}
-		
-		private System.Windows.Forms.ToolStripStatusLabel currentStatusLabel;
+
+       // private DoubleBufferedPanel viewPort;
+        private System.Windows.Forms.ToolStripStatusLabel currentStatusLabel;
 		private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem imageToolStripMenuItem;
@@ -751,8 +777,7 @@
         private System.Windows.Forms.ToolStripMenuItem starButton;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.FlowLayoutPanel layoutPanel;
-        private DoubleBufferedPanel viewPort;
+        private System.Windows.Forms.FlowLayoutPanel layoutPanel;       
         private System.Windows.Forms.Label zoomInfoLabel;
         private System.Windows.Forms.Label infoLabel;
         private System.Windows.Forms.ToolStripMenuItem saveFileButton;
@@ -761,5 +786,9 @@
         private System.Windows.Forms.ToolStripMenuItem openFilePngButton;
         private System.Windows.Forms.ToolStripMenuItem drawToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem pngToolStripMenuItem1;
+        private System.Windows.Forms.TabControl tabMenu;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.ToolStripMenuItem newProjectToolStripMenuItem;
+        private TabPage tabPage2;
     }
 }

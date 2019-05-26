@@ -17,7 +17,7 @@ namespace Draw.src.Common
             control.Invalidate();
         }
 
-        public static void OpenFileAsDraw(string path, DialogProcessor dialogProcessor)
+        public static void OpenFileAsDraw(string path, DoubleBufferedPanel viewPort)
         {
             /* unfortunately, it's impossible to make desirialization from an abstract class.
             Therefore, we initialize a new type of shape from an instance of shape and then desirialize json file 
@@ -30,22 +30,22 @@ namespace Draw.src.Common
                 switch (item.Type)
                 {                    
                     case "RectangleShape":
-                        dialogProcessor.AddShape(new RectangleShape(item));
+                        viewPort.AddShape(new RectangleShape(item));
                         break;
                     case "EllipseShape":
-                        dialogProcessor.AddShape(new EllipseShape(item));
+                        viewPort.AddShape(new EllipseShape(item));
                         break;
                     case "HeartShape":
-                        dialogProcessor.AddShape(new HeartShape(item));
+                        viewPort.AddShape(new HeartShape(item));
                         break;
                     case "ImageShape":
-                        dialogProcessor.AddShape(new RectangleShape(item));
+                        viewPort.AddShape(new RectangleShape(item));
                         break;
                     case "LineShape":
-                        dialogProcessor.AddShape(new LineShape(item));
+                        viewPort.AddShape(new LineShape(item));
                         break;
                     case "StarShape":
-                        dialogProcessor.AddShape(new StarShape(item));
+                        viewPort.AddShape(new StarShape(item));
                         break;
                 }
             }

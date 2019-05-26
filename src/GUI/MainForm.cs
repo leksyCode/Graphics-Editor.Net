@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using Draw.src.Common;
+using System.IO;
 
 namespace Draw
 {
@@ -14,16 +15,20 @@ namespace Draw
     /// </summary>
     public partial class MainForm : Form
     {
-        public static Color FillColor { get; set; } = new Color();
-        public static Color BorderColor { get; set; } = new Color();
+        //view panel states for multiple tabs
+        public static List<DoubleBufferedPanel> viewPortsList = new List<DoubleBufferedPanel>();
+        public static DoubleBufferedPanel CurrentViewPort { get; set; } = new DoubleBufferedPanel("New project");
         public static Shape ShapeToDraw { get; set; } = new RectangleShape();
-        public static int viewPortStaticWidth, viewPortStaticHeight;
+        public static Color FillColor { get; set; } = new Color();
+        public static Color BorderColor { get; set; } = new Color();       
+        public const int viewPortStaticWidth = 1280, viewPortStaticHeight = 720;
+        public static int untitledTabs = 1;
         public static float zoom = 1;
         private Point _p, _p2;
         private Rectangle _r;
         int penWidth;
 
-        public static List<Button> layoutButtons = new List<Button>();
+        //public static List<Button> layoutButtons = new List<Button>();
 
         /// <summary>
         /// Агрегирания диалогов процесор във формата улеснява манипулацията на модела.
@@ -33,15 +38,26 @@ namespace Draw
         public MainForm()
         {
             InitializeComponent();
+            // Initialize first viePort tab
+            CurrentViewPort.InitializeComponent();                   
+            tabMenu.SelectedTab.Text = "New project";
+            viewPortsList.Add(CurrentViewPort);
+            CurrentViewPort.Load += new EventHandler(ViewPortLoad);
+            panel1.Controls.Add(CurrentViewPort);
         }
 
-        private void viewPort_Load(object sender, EventArgs e)
+
+
+        void ViewPortLoad(object sender, EventArgs e)
         {
-            viewPort.MouseWheel += new MouseEventHandler(viewPort_MouseWheel);
-            viewPort.KeyPress += new KeyPressEventHandler(ViewPort_KeyPress);
-            viewPortStaticWidth = viewPort.Width;
-            viewPortStaticHeight = viewPort.Height;
-        }      
+            CurrentViewPort.Paint += new PaintEventHandler(ViewPortPaint);
+            CurrentViewPort.KeyPress += new KeyPressEventHandler(ViewPortKeyPress);
+            CurrentViewPort.MouseDown += new MouseEventHandler(ViewPortMouseDown);
+            CurrentViewPort.MouseMove += new MouseEventHandler(ViewPortMouseMove);
+            CurrentViewPort.MouseUp += new MouseEventHandler(ViewPortMouseUp);
+            CurrentViewPort.MouseWheel += new MouseEventHandler(ViewPortMouseWheel);
+        }
+
 
         /// <summary>
         /// Събитието, което се прихваща, за да се превизуализира при изменение на модела.
@@ -97,27 +113,27 @@ namespace Draw
                     e.Graphics.DrawLine(new Pen(Color.FromArgb(95, BorderColor), penWidth + 1), _p, _p2);
                 }
             }
-            dialogProcessor.ReDraw(sender, e);
+            dialogProcessor.ReDraw(sender, e, CurrentViewPort);
         }
 
-        private void ViewPort_KeyPress(object sender, KeyPressEventArgs e)
+        private void ViewPortKeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar == 26 && ModifierKeys.HasFlag(Keys.Control) && dialogProcessor.ShapeList.Count != 0)
+            if (e.KeyChar == 26 && ModifierKeys.HasFlag(Keys.Control) && CurrentViewPort.ShapeList.Count != 0)
             {
                 statusBar.Items[0].Text = "Last action: Ctrl + Z";
-                dialogProcessor.ShapeList.RemoveAt(dialogProcessor.ShapeList.Count - 1);
-                viewPort.Invalidate();
+                CurrentViewPort.ShapeList.RemoveAt(CurrentViewPort.ShapeList.Count - 1);
+                CurrentViewPort.Refresh();
             }
         }
 
         private void cancelActionButton_Click(object sender, EventArgs e)
         {
             statusBar.Items[0].Text = "Last action: Ctrl + Z";
-            dialogProcessor.ShapeList.Remove(dialogProcessor.ShapeList[dialogProcessor.ShapeList.Count - 1]);
-            viewPort.Invalidate();
+            CurrentViewPort.ShapeList.Remove(CurrentViewPort.ShapeList[CurrentViewPort.ShapeList.Count - 1]);
+            CurrentViewPort.Refresh();
         }
 
-        private void viewPort_MouseWheel(object sender, MouseEventArgs e)
+        private void ViewPortMouseWheel(object sender, MouseEventArgs e)
         {
             // Sets the zoom to be used in the future
             if (ModifierKeys.HasFlag(Keys.Control))
@@ -125,8 +141,8 @@ namespace Draw
                 if (e.Delta > 0)
                 {
                     zoom += 0.1f;
-                    viewPort.Width = (int)(viewPortStaticWidth * zoom);
-                    viewPort.Height = (int)(viewPortStaticHeight * zoom);
+                    CurrentViewPort.Width = (int)(viewPortStaticWidth * zoom);
+                    CurrentViewPort.Height = (int)(viewPortStaticHeight * zoom);
                     
                 }
                 else if (zoom <= 1)
@@ -136,11 +152,11 @@ namespace Draw
                 else
                 {
                     zoom -= 0.1f;
-                    viewPort.Width = (int)(viewPortStaticWidth * zoom);
-                    viewPort.Height = (int)(viewPortStaticHeight * zoom);
+                    CurrentViewPort.Width = (int)(viewPortStaticWidth * zoom);
+                    CurrentViewPort.Height = (int)(viewPortStaticHeight * zoom);
                 }
                 zoomInfoLabel.Text = "Zoom:\n" + (zoom * 100).ToString() + "%";
-                viewPort.Invalidate();
+                CurrentViewPort.Refresh();
             }
         }
 
@@ -155,12 +171,12 @@ namespace Draw
         {
             if (pickUpSpeedButton.Checked)
             {
-                dialogProcessor.Selection = dialogProcessor.ContainsPoint(e.Location);
+                dialogProcessor.Selection = dialogProcessor.ContainsPoint(e.Location, CurrentViewPort);
                 if (dialogProcessor.Selection != null)
                 {
                     //move picked shape to top of list
-                    dialogProcessor.ShapeList.Remove(dialogProcessor.Selection);
-                    dialogProcessor.AddShape(dialogProcessor.Selection);
+                    CurrentViewPort.ShapeList.Remove(dialogProcessor.Selection);
+                    CurrentViewPort.AddShape(dialogProcessor.Selection);
 
                     //  Add and remove in multiple selection using Ctrl 
                     if (ModifierKeys.HasFlag(Keys.Control))
@@ -172,7 +188,7 @@ namespace Draw
                         }
                         else
                         {
-                            dialogProcessor.ShapeList.Find(s => s.Equals(dialogProcessor.Selection)).IsSelected = false;
+                            CurrentViewPort.ShapeList.Find(s => s.Equals(dialogProcessor.Selection)).IsSelected = false;
                             dialogProcessor.Selections.Remove(dialogProcessor.Selection);
                         }
                     }
@@ -197,8 +213,8 @@ namespace Draw
                     + " transparency: " + dialogProcessor.Selection.Transparency + "\n"
                     + " location: " + dialogProcessor.Selection.Location.ToString() + "\n"
                     + " shape: " + dialogProcessor.Selection.GetType().Name;
-                } 
-                viewPort.Invalidate();
+                }
+                CurrentViewPort.Refresh();
             }
             if (pickUpButton.Checked)
             {
@@ -207,12 +223,12 @@ namespace Draw
             }
             if (eraseButton.Checked)
             {
-                dialogProcessor.Selection = dialogProcessor.ContainsPoint(e.Location);
+                dialogProcessor.Selection = dialogProcessor.ContainsPoint(e.Location, CurrentViewPort);
                 if (dialogProcessor.Selection != null)
                 {
                     statusBar.Items[0].Text = "Last action: Erase primitive";
-                    dialogProcessor.ShapeList.Remove(dialogProcessor.Selection);
-                    viewPort.Invalidate();
+                    CurrentViewPort.ShapeList.Remove(dialogProcessor.Selection);
+                    CurrentViewPort.Refresh();
                 }
             }
         }
@@ -230,8 +246,8 @@ namespace Draw
                     statusBar.Items[0].Text = "Последно действие: Влачене";
                     dialogProcessor.TranslateTo(e.Location);
                 }
-                   
-                viewPort.Invalidate();
+
+                CurrentViewPort.Refresh();
             }
 
             if (dialogProcessor.IsDrawingNewShape)
@@ -245,7 +261,7 @@ namespace Draw
                     // The same, but for LineShape
                     _p2 = e.Location;
                     statusBar.Items[0].Text = "Last action: Drawing new shape";
-                    viewPort.Invalidate();
+                    CurrentViewPort.Refresh();
                 }
             }
         }
@@ -270,26 +286,26 @@ namespace Draw
 
                 if (ShapeToDraw is RectangleShape)
                 {
-                    dialogProcessor.AddShape(rect);
+                    CurrentViewPort.AddShape(rect);
                 }
                 else if (ShapeToDraw is EllipseShape)
                 {
-                    dialogProcessor.AddShape(new EllipseShape(rect));
+                    CurrentViewPort.AddShape(new EllipseShape(rect));
                 }
                 else if (ShapeToDraw is HeartShape)
                 {
-                    dialogProcessor.AddShape(new HeartShape(rect));
+                    CurrentViewPort.AddShape(new HeartShape(rect));
                 }
                 else if(ShapeToDraw is StarShape)
                 {
-                    dialogProcessor.AddShape(new StarShape(rect));
+                    CurrentViewPort.AddShape(new StarShape(rect));
                 }
                 else if (ShapeToDraw is LineShape)
                 {
-                    dialogProcessor.AddShape(new LineShape(new PointF(_p.X / zoom, _p.Y / zoom), new PointF(_p2.X / zoom, _p2.Y / zoom), penWidth, rect.Transparency));
+                    CurrentViewPort.AddShape(new LineShape(new PointF(_p.X / zoom, _p.Y / zoom), new PointF(_p2.X / zoom, _p2.Y / zoom), penWidth, rect.Transparency));
                 }
                 dialogProcessor.IsDrawingNewShape = false;
-                viewPort.Invalidate();
+                CurrentViewPort.Refresh();
             }
 
         }
@@ -299,15 +315,16 @@ namespace Draw
         {
             colorButton.Text = "Fill";
             colorBox.BackColor = FillColor;
-            viewPort.Invalidate();
+            CurrentViewPort.Refresh();
         }
 
 
         private void borderColorButton_Click(object sender, EventArgs e)
         {
+            CurrentViewPort = new DoubleBufferedPanel();
             colorButton.Text = "Border";
             colorBox.BackColor = BorderColor;
-            viewPort.Invalidate();
+            CurrentViewPort.Refresh();
         }
 
         private void colorBox_Click(object sender, EventArgs e)
@@ -326,7 +343,7 @@ namespace Draw
                     FillColor = colorDialog1.Color;
                     dialogProcessor.SetFillColor(FillColor);
                 }
-                viewPort.Invalidate();
+                CurrentViewPort.Refresh();
             }
         }
 
@@ -381,13 +398,13 @@ namespace Draw
         private void heightPicker_ValueChanged(object sender, EventArgs e)
         {
             dialogProcessor.SetNewHeight((int)heightPicker.Value);
-            viewPort.Invalidate();
+            CurrentViewPort.Refresh();
         }
 
         private void widthPicker_ValueChanged(object sender, EventArgs e)
         {
             dialogProcessor.SetNewWidth((int)widthPicker.Value);
-            viewPort.Invalidate();
+            CurrentViewPort.Refresh();
         }
 
 
@@ -395,27 +412,41 @@ namespace Draw
         {
             penWidth = Convert.ToInt32(penWidthPicker.Value);
             dialogProcessor.SetNewBorderWidth(penWidth, BorderColor);
-            viewPort.Invalidate();
+            CurrentViewPort.Refresh();
         }
      
         private void transparencyPicker_ValueChanged(object sender, EventArgs e)
         {
             dialogProcessor.SetNewTransparency((int)transparencyPicker.Value);
-            viewPort.Invalidate();
+            CurrentViewPort.Refresh();
         }
 
+        private void newProjectButton_Click(object sender, EventArgs e)
+        {
+            string userInput = dialogProcessor.ShowDialog("Project name: ", tabMenu.SelectedTab.Text);
+            if (userInput != "" && userInput != null)
+            {
+                tabMenu.TabPages.Add(new TabPage(userInput));
+            }
+            else
+            {
+                tabMenu.TabPages.Add(new TabPage("New project" + untitledTabs));
+                untitledTabs++;
+            }
+            tabMenu.SelectedIndex = tabMenu.TabPages.Count - 1;
+        }
 
         private void openFileDrawButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog open = new OpenFileDialog();
-            open.Filter = "Image Files(*.draw;)| *.draw; ";
+            open.Filter = "Image Files(*.draw;)| *.draw; ";           
             if (open.ShowDialog() == DialogResult.OK)
             {
-                Opener.OpenFileAsDraw(open.FileName, dialogProcessor);
-            }
-
+                Opener.OpenFileAsDraw(open.FileName, CurrentViewPort);
+                tabMenu.SelectedTab.Text = Path.GetFileNameWithoutExtension(open.FileName);
+            }           
             statusBar.Items[0].Text = "Last action: Uploading project file as draw";
-            viewPort.Invalidate();
+            CurrentViewPort.Refresh();
         }
 
         private void openFilePngButton_Click(object sender, EventArgs e)
@@ -424,9 +455,11 @@ namespace Draw
             open.Filter = "Image Files(*.png;)| *.png; ";
             if (open.ShowDialog() == DialogResult.OK)
             {
-                Opener.OpenFileAsPng(open.FileName, viewPort);
+                Opener.OpenFileAsPng(open.FileName, CurrentViewPort);
+                tabMenu.SelectedTab.Text = Path.GetFileNameWithoutExtension(open.FileName);
             }
-            viewPort.Invalidate();
+            statusBar.Items[0].Text = "Last action: Uploading project file as draw";
+            CurrentViewPort.Refresh();
         }
 
 
@@ -434,10 +467,12 @@ namespace Draw
         {
             SaveFileDialog save = new SaveFileDialog();
             save.Filter = "Image Files(*.draw;)| *.draw; ";
+            save.FileName = tabMenu.SelectedTab.Text;
             if (save.ShowDialog() == DialogResult.OK)
             {
-                Saver.SaveFileAsDraw(save.FileName, dialogProcessor.ShapeList);
-            }
+                Saver.SaveFileAsDraw(save.FileName, CurrentViewPort.ShapeList);
+                tabMenu.SelectedTab.Text = Path.GetFileNameWithoutExtension(save.FileName);
+            }       
             statusBar.Items[0].Text = "Last action: Save project file as draw";
         }
 
@@ -445,14 +480,16 @@ namespace Draw
         {
             //Drawing our viewPort control to bitmap and then save it
             Bitmap bitmap = new Bitmap(viewPortStaticWidth, viewPortStaticHeight);
-            viewPort.DrawToBitmap(bitmap, new Rectangle(0, 0, viewPortStaticWidth, viewPortStaticHeight));
+            CurrentViewPort.DrawToBitmap(bitmap, new Rectangle(0, 0, viewPortStaticWidth, viewPortStaticHeight));
 
             SaveFileDialog save = new SaveFileDialog();
             save.Filter = "Image Files(*.png;)| *.png; ";
+            save.FileName = tabMenu.SelectedTab.Text;
             if (save.ShowDialog() == DialogResult.OK)
             {
                 Saver.SaveFileAsPng(save.FileName, bitmap);
-            }          
+                tabMenu.SelectedTab.Text = Path.GetFileNameWithoutExtension(save.FileName);
+            }            
             statusBar.Items[0].Text = "Last action: Save project file as png";
         }
 
@@ -460,9 +497,35 @@ namespace Draw
         private void rotationPicker_ValueChanged(object sender, EventArgs e)
         {
             dialogProcessor.SetNewRotation((float)rotationPicker.Value);
-            viewPort.Invalidate();
+            CurrentViewPort.Refresh();
         }
 
+
+        // when changing the tab, check if there exist, if not, then add and initialize a new one, 
+        //then compare currentViewPort with viewPortsList
+        private void tabMenu_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            panel1.Controls.Clear();
+
+            if (!viewPortsList.Exists(v => v.Name == tabMenu.SelectedTab.Text))
+            {
+                CurrentViewPort = new DoubleBufferedPanel(tabMenu.SelectedTab.Text);
+                CurrentViewPort.InitializeComponent();
+                viewPortsList.Add(CurrentViewPort);
+                CurrentViewPort.Load += new EventHandler(ViewPortLoad);
+            }
+
+
+            foreach (var port in viewPortsList)
+            {
+                if (port.Name == tabMenu.SelectedTab.Text)
+                {
+                    CurrentViewPort = port;                  
+                    panel1.Controls.Add(CurrentViewPort);
+                    break;
+                }
+            }
+        }
 
         private void addImageButton_Click(object sender, EventArgs e)
         {
@@ -471,7 +534,7 @@ namespace Draw
             if (open.ShowDialog() == DialogResult.OK)
             {
                 ShapeToDraw = new ImageShape();
-                dialogProcessor.AddShape(new ImageShape(open.FileName, new RectangleShape(new RectangleF(0, 0, Image.FromFile(open.FileName).Width / 2, Image.FromFile(open.FileName).Height / 2))));
+                CurrentViewPort.AddShape(new ImageShape(open.FileName, new RectangleShape(new RectangleF(0, 0, Image.FromFile(open.FileName).Width / 2, Image.FromFile(open.FileName).Height / 2))));
             }
 
             //layoutButtons.Add(new Button());
@@ -487,7 +550,7 @@ namespace Draw
             //    item.Size = new Size(layoutPanel.Width, 65);
             //    layoutPanel.Controls.Add(item);
             //}
-            viewPort.Invalidate();
+            CurrentViewPort.Refresh();            
         }
 
         /// <summary>

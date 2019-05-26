@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace Draw
 {
@@ -40,20 +41,7 @@ namespace Draw
         /// Добавя примитив - правоъгълник на произволно място върху клиентската област.
         /// </summary>
 
-        public void AddShape(Shape shape)
-        {
-            if (shape.FillColor == Color.Empty)
-            {               
-                shape.FillColor = MainForm.FillColor;
-            }
-            if (shape.BorderColor == Color.Empty)
-            {
-                shape.BorderColor = MainForm.BorderColor;
-            }
-            // To know the shape type after deserialization from json file
-            shape.Type = shape.GetType().Name;           
-            ShapeList.Add(shape);
-        }
+       
 
         /// <summary>
         /// Проверява дали дадена точка е в елемента.
@@ -62,13 +50,13 @@ namespace Draw
         /// </summary>
         /// <param name="point">Указана точка</param>
         /// <returns>Елемента на изображението, на който принадлежи дадената точка.</returns>
-        public Shape ContainsPoint(PointF point)
+        public Shape ContainsPoint(PointF point, DoubleBufferedPanel vPort)
         {
-            for (int i = ShapeList.Count - 1; i >= 0; i--)
+            for (int i = vPort.ShapeList.Count - 1; i >= 0; i--)
             {
-                if (ShapeList[i].Contains(point))
+                if (vPort.ShapeList[i].Contains(point))
                 {
-                    return ShapeList[i];
+                    return vPort.ShapeList[i];
                 }
             }
             return null;
@@ -164,6 +152,29 @@ namespace Draw
                     item.Rotation = rotation;
                 }
             }
+        }
+
+        public string ShowDialog(string text, string caption)
+        {
+            // Universal dialog form            
+            Form prompt = new Form()
+            {
+                Width = 500,
+                Height = 150,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                Text = caption,
+                StartPosition = FormStartPosition.CenterScreen,                
+            };            
+            Label textLabel = new Label() { Left = 50, Top = 20, Text = text};
+            TextBox textBox = new TextBox() { Left = 50, Top = 50, Width = 400 };
+            Button confirmation = new Button() { Text = "Ok", Left = 350, Width = 100, Top = 70, DialogResult = DialogResult.OK };
+            confirmation.Click += (sender, e) => { prompt.Close();};
+            prompt.Controls.Add(textBox);
+            prompt.Controls.Add(confirmation);
+            prompt.Controls.Add(textLabel);
+            prompt.AcceptButton = confirmation;
+
+            return prompt.ShowDialog() == DialogResult.OK ? textBox.Text : "";
         }
     }
 }
